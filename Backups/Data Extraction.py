@@ -2,18 +2,14 @@
 """
 Created on Tue Jan 14 11:44:07 2020
 
-@author: mishaun bhakta
+@author: mishaun
 """
 
 import os, re, openpyxl, calendar
 import pandas as pd
 
-
+#function to remove old .xls files after running macro to convert xls to xlsx
 def cleanup(files):
-    '''
-    function to remove old .xls files after running macro to convert xls to xlsx
-    '''
-    
     for name in files:
         #checks multiple places after splitting at . for files that have . at the end of name (for ex: blackstone files)
         #try and except statement to prevent break on index out of bounds 
@@ -74,16 +70,14 @@ days = calendar.monthrange(reportYear, monthDict[reportMonth])[1]
 
 
 #Path for gauge sheet folder
-#function will get directory of project folder where this file python file is located
-abspath = os.path.dirname(__file__)
-gauge_sheet_directory = abspath + '\\Gauge Sheets - November 2019'
+gauge_sheet_directory = 'F:\MAGNUM\Mishaun\Python Scripts\Data Extraction\Gauge Sheets - November 2019'
 
 #Storing file names for gauge sheets in variable filenames
 filenames = os.listdir(gauge_sheet_directory)
 
 #importing data map dataframe
-data_map_path = 'Data Map - Gauge Sheets - MPLP.xlsx'
-data_map = pd.read_excel(data_map_path, header = 6, usecols = 'C:AE')
+data_map_path = 'F:\MAGNUM\Mishaun\Production Reporting\Mishaun Notes'
+data_map = pd.read_excel(data_map_path + '\\' + 'Data Map - Gauge Sheets - MPLP.xlsx', header = 6, usecols = 'C:AE')
 
 
 #limiting data map to the wells that have inputted info based on oil production last month
@@ -91,7 +85,7 @@ map_filtered = data_map[(data_map['FilterList']==1) & (data_map["Filename"] != '
 
 
 #slicing off 1 well and assigning values needed for determining which functions to call
-well = map_filtered.iloc[27]
+well = map_filtered.iloc[14]
 
 ######### Excel opening, retrieving, closing section
 
@@ -107,7 +101,11 @@ if well["RRC ID"] == 21610:
     except:
         pass
 
+
 sheetnames = wb.sheetnames
+
+
+
 
 ######Picking Correct Sheet in Workbook Section
 
