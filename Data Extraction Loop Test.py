@@ -5,9 +5,11 @@ Created on Tue Jan 14 11:44:07 2020
 @author: mishaun bhakta
 """
 
-import os, re, openpyxl, calendar
+import os, re, openpyxl, calendar, time
 import pandas as pd
 
+
+t = time.time()
 
 def cleanup(files):
     '''
@@ -229,3 +231,5 @@ data_map["Closing Stock Diff"] = data_map["Closing Oil Stock"] - data_map["Manua
 map_filtered = data_map[(data_map['FilterList']==1) & (data_map["Filename"] != 'Not Available')]
 
 checker = map_filtered[["Lease Name", "Gauge Sheet Prod Vol","Manual Extraction Gauge Sheet Prod", "Closing Oil Stock","Manual Extraction Closing Stock","Gauge Prod Diff", "Closing Stock Diff"]]
+
+print("--- %s seconds ---" % (time.time() - t))
