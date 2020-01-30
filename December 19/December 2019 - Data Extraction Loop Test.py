@@ -5,7 +5,7 @@ Created on Tue Jan 14 11:44:07 2020
 @author: mishaun bhakta
 """
 
-import os, re, openpyxl, calendar, time
+import os, re, openpyxl, calendar, time, pdb
 import pandas as pd
 
 
@@ -66,7 +66,7 @@ def special_remove(workbook, sheetindex):
     
     
 #Parameters for input based on report month
-reportMonth = "Nov"
+reportMonth = "Dec"
 reportYear = 2019
 monthDict={'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
 
@@ -78,149 +78,151 @@ days = calendar.monthrange(reportYear, monthDict[reportMonth])[1]
 #Path for gauge sheet folder
 #function will get directory of project folder where this file python file is located
 abspath = os.path.dirname(__file__)
-gauge_sheet_directory = abspath + '\\Gauge Sheets - November 2019'
+gauge_sheet_directory = abspath + '\\Gauge Sheets - December 2019'
 
 #Storing file names for gauge sheets in variable filenames
 filenames = os.listdir(gauge_sheet_directory)
 
 #importing data map dataframe
-data_map_path = 'Data Map - Gauge Sheets - MPLP.xlsx'
-data_map = pd.read_excel(data_map_path, header = 6, usecols = 'C:AE')
+data_map_path = 'Full PR and Data Map.xlsm'
+data_map = pd.read_excel(data_map_path, header = 4, sheet_name = "Working Spreadsheet November 19", usecols = 'C:AQ')
+
+
 
 
 #limiting data map to the wells that have inputted info based on oil production last month
-map_filtered = data_map[(data_map['FilterList']==1) & (data_map["Filename"] != 'Not Available')]
+map_filtered = data_map[(data_map['Magnum Wolfpak #'].notnull()) & (data_map["Filename"] != 'Not Available')]
+map_filtered = map_filtered[:-1]
 
-for x in range(0,len(map_filtered)):
-    #slicing off 1 well and assigning values needed for determining which functions to call
-    well = map_filtered.iloc[x]
+#slicing off 1 well and assigning values needed for determining which functions to call
+well = map_filtered.iloc[0]
+
+######### Excel opening, retrieving, closing section
+
+#opening workbook - dataonly flag set to true to get values only from cells
+
+gauge_sheet_filename = well["Filename"]
+wb = openpyxl.load_workbook(gauge_sheet_directory + '\\' + gauge_sheet_filename, data_only = True)
+
+#special case to cleanup vieman gauge sheet names for data to be found correctly - removing second sheet in gaugesheet which is useless
+if well["RRC ID"] == 21610:
+    try:
+        special_remove(wb,1)
+    except:
+        pass
+
+sheetnames = wb.sheetnames
+
+######Picking Correct Sheet in Workbook Section
+
+#variable will be assigned in one of the if statements
+getsheet = ""
+
+#checking condition if well has gauge sheets by month and year
+if well["Monthly Tabs"]=="Y" and well["Multiple Years"] == "Y":
     
-    ######### Excel opening, retrieving, closing section
+    for name in sheetnames:
+        if reportMonth.upper() in name.upper() and str(reportYear)[-2:] in name:
+            getsheet = name
+            break
     
-    #opening workbook - dataonly flag set to true to get values only from cells
-    
-    gauge_sheet_filename = well["Filename"]
-    wb = openpyxl.load_workbook(gauge_sheet_directory + '\\' + gauge_sheet_filename, data_only = True)
-    
-    #special case to cleanup vieman gauge sheet names for data to be found correctly - removing second sheet in gaugesheet which is useless
-    if well["RRC ID"] == 21610:
-        try:
-            special_remove(wb,1)
-        except:
-            pass
-    
-    sheetnames = wb.sheetnames
-    
-    ######Picking Correct Sheet in Workbook Section
-    
-    #variable will be assigned in one of the if statements
-    getsheet = ""
-    
-    #checking condition if well has gauge sheets by month and year
-    if well["Monthly Tabs"]=="Y" and well["Multiple Years"] == "Y":
-        
-        for name in sheetnames:
-            if reportMonth.upper() in name.upper() and str(reportYear)[-2:] in name:
-                getsheet = name
-                break
-        
-        #This will check the workbook for tab labeled with report month if the above statement fails
-        if len(getsheet) == 0:
-            for name in sheetnames:
-                if reportMonth.upper() in name.upper():
-                    getsheet = name
-                    break 
-            
-    #checking condition if well has gauge sheets by month
-    elif well["Monthly Tabs"]=="Y" and well["Multiple Years"] == "N":
-        
+    #This will check the workbook for tab labeled with report month if the above statement fails
+    if len(getsheet) == 0:
         for name in sheetnames:
             if reportMonth.upper() in name.upper():
                 getsheet = name
-                break
-    
-    #Checking condition if well does not have monthly tabs, then look for well name
-    elif well["Monthly Tabs"] == "N":
+                break 
         
-        if len(sheetnames) == 1:
-            getsheet = sheetnames[0]
-        else:
-            #taking well name and splitting at nonalphanumeric characters
-            regex = re.split('\W', well["Lease Name"].upper())
-            
-            matches = []
-            #taking each instance of the split well name and searching through each sheetname
-            for item in regex:
-                for name in sheetnames:
-                    #Only looking at first 75% of letters of regex
-                    item_length = round(len(item)*0.75)
-                    match = re.findall(item[0:item_length], name.upper())
-                    #if the wellname regex is found, append the name of the sheet to the matches array
-                    if match:
-                        matches.append(name)
-                #if matches were found/appended, then we can break the regex search loop 
-                if len(matches)>0:
-                    break
-            #checking to see if there were multiple matches, if 1 match, then get the only sheet
-            if len(matches) < 2:
-                getsheet = matches[0]
-            
-            #if there are more than 1 match, pull the well number using regex library and search the matches list for that number
-            elif len(matches)>=2:
-                for i in range(0,len(matches)):
-                    #if the string value of well number = digit found in sheetname, break loop and assign sheetname to getsheet
-                    if str(well["Well Number"]) == re.findall('\d', matches[i])[0]:
-                        break
-                
-                getsheet = matches[i]
-                    
-            
+#checking condition if well has gauge sheets by month
+elif well["Monthly Tabs"]=="Y" and well["Multiple Years"] == "N":
     
-    #assigning found sheet to sheet            
-    sheet = wb[getsheet]
+    for name in sheetnames:
+        if reportMonth.upper() in name.upper():
+            getsheet = name
+            break
+
+#Checking condition if well does not have monthly tabs, then look for well name
+elif well["Monthly Tabs"] == "N":
     
-    #####End Picking Sheet Section
-    
-    ####Getting Closing Stock Section
-    
-    #splitting data in stock cell at comma to account for wells that require adding multiple tanks
-    stockCells = well["Oil Stock Cell"].split(',')
-    closing_stock=0
-    
-    #if no shift is required, get values in stock cells and sum and round    
-    if well["Shift Up Required"] == "N":
-        closing_stock = getStockSum(stockCells)
-    
+    if len(sheetnames) == 1:
+        getsheet = sheetnames[0]
     else:
-        shiftedStockCells = []  
+        #taking well name and splitting at nonalphanumeric characters
+        regex = re.split('\W', well["Lease Name"].upper())
         
-        for cell in stockCells:
-            #re.findall returns list, so indexing string value at 0
-            cellNumber = re.findall(r'\d+', cell)[0]
-            
-            #shifting value of cell up by however many days there in the month against default 31 days and converting back to string
-            cellNumber = str(int(cellNumber) - (31-days))
-            
-            #extracting letter from oil stock cells to concat with shifted cell number
-            cellLetter = re.findall('[A-Z]',cell)[0]
-            
-            shiftedStockCells.append(cellLetter + cellNumber)
+        matches = []
+        #taking each instance of the split well name and searching through each sheetname
+        for item in regex:
+            for name in sheetnames:
+                #Only looking at first 75% of letters of regex
+                item_length = round(len(item)*0.75)
+                match = re.findall(item[0:item_length], name.upper())
+                #if the wellname regex is found, append the name of the sheet to the matches array
+                if match:
+                    matches.append(name)
+            #if matches were found/appended, then we can break the regex search loop 
+            if len(matches)>0:
+                break
+        #checking to see if there were multiple matches, if 1 match, then get the only sheet
+        if len(matches) < 2:
+            getsheet = matches[0]
         
-        closing_stock = getStockSum(shiftedStockCells)
-        
-        
+        #if there are more than 1 match, pull the well number using regex library and search the matches list for that number
+        elif len(matches)>=2:
+            for i in range(0,len(matches)):
+                #if the string value of well number = digit found in sheetname, break loop and assign sheetname to getsheet
+                if str(well["Well Number"]) == re.findall('\d', matches[i])[0]:
+                    break
             
-    ##############Pulling gauge sheet production section       
+            getsheet = matches[i]
+                
+        
+
+#assigning found sheet to sheet            
+sheet = wb[getsheet]
+
+#####End Picking Sheet Section
+
+####Getting Closing Stock Section
+
+#splitting data in stock cell at comma to account for wells that require adding multiple tanks
+stockCells = well["Oil Stock Cell"].split(',')
+closing_stock=0
+
+#if no shift is required, get values in stock cells and sum and round    
+if well["Shift Up Required"] == "N":
+    closing_stock = getStockSum(stockCells)
+
+else:
+    shiftedStockCells = []  
     
-    #pulling gauge sheet production by passing in range of cells needed to be summed from datamap
-    start_cell = well["Gauge Sheet Oil Production"].split(",")[0]
-    end_cell = well["Gauge Sheet Oil Production"].split(",")[1]
-    gauge_prod_cells = sheet[start_cell:end_cell]
-    gauge_prod = round(getSum(gauge_prod_cells))
+    for cell in stockCells:
+        #re.findall returns list, so indexing string value at 0
+        cellNumber = re.findall(r'\d+', cell)[0]
+        
+        #shifting value of cell up by however many days there in the month against default 31 days and converting back to string
+        cellNumber = str(int(cellNumber) - (31-days))
+        
+        #extracting letter from oil stock cells to concat with shifted cell number
+        cellLetter = re.findall('[A-Z]',cell)[0]
+        
+        shiftedStockCells.append(cellLetter + cellNumber)
     
-    #passing in value to main data frame using loc to avoid SettingWithCopyWarning
-    data_map.loc[data_map["RRC ID"] == well["RRC ID"], "Closing Oil Stock"] = closing_stock
-    data_map.loc[data_map["RRC ID"] == well["RRC ID"], "Gauge Sheet Prod Vol"] = gauge_prod
+    closing_stock = getStockSum(shiftedStockCells)
+    
+    
+        
+##############Pulling gauge sheet production section       
+
+#pulling gauge sheet production by passing in range of cells needed to be summed from datamap
+start_cell = well["Gauge Sheet Oil Production"].split(",")[0]
+end_cell = well["Gauge Sheet Oil Production"].split(",")[1]
+gauge_prod_cells = sheet[start_cell:end_cell]
+gauge_prod = round(getSum(gauge_prod_cells))
+
+#passing in value to main data frame using loc to avoid SettingWithCopyWarning
+data_map.loc[data_map["RRC ID"] == well["RRC ID"], "Closing Oil Stock"] = closing_stock
+data_map.loc[data_map["RRC ID"] == well["RRC ID"], "Gauge Sheet Prod Vol"] = gauge_prod
 
 
 #adding two columns to check manual vs automated extraction differences
@@ -228,8 +230,9 @@ data_map["Gauge Prod Diff"] = data_map["Gauge Sheet Prod Vol"] - data_map["Manua
 data_map["Closing Stock Diff"] = data_map["Closing Oil Stock"] - data_map["Manual Extraction Closing Stock"]
 
 #updating filtered version of full data_map
-map_filtered = data_map[(data_map['FilterList']==1) & (data_map["Filename"] != 'Not Available')]
-
+map_filtered = data_map[(data_map['Magnum Wolfpak #'].notnull()) & (data_map["Filename"] != 'Not Available')]
+map_filtered = map_filtered[:-1]
+                          
 checker = map_filtered[["Lease Name", "Gauge Sheet Prod Vol","Manual Extraction Gauge Sheet Prod", "Closing Oil Stock","Manual Extraction Closing Stock","Gauge Prod Diff", "Closing Stock Diff"]]
 
 print("--- %s seconds ---" % (time.time() - t))
