@@ -94,15 +94,63 @@ data_map = pd.read_excel(data_map_path, header = 4, sheet_name = "Working Spread
 map_filtered = data_map[(data_map['Magnum Wolfpak #'].notnull()) & (data_map["Filename"] != 'Not Available')]
 map_filtered = map_filtered[:-1]
 
+
+
 #slicing off 1 well and assigning values needed for determining which functions to call
-well = map_filtered.iloc[0]
+well = map_filtered.iloc[1]
 
 ######### Excel opening, retrieving, closing section
 
 #opening workbook - dataonly flag set to true to get values only from cells
+wb = None
 
-gauge_sheet_filename = well["Filename"]
-wb = openpyxl.load_workbook(gauge_sheet_directory + '\\' + gauge_sheet_filename, data_only = True)
+#pdb.set_trace()
+
+try:
+    gauge_sheet_filename = well["Filename"]
+    wb = openpyxl.load_workbook(gauge_sheet_directory + '\\' + gauge_sheet_filename, data_only = True)
+except:
+    #splitting lease name by nonalphanumerica to search in file names
+    regex = re.split("\W", well["Lease Name"]) 
+    
+    matches = []
+        
+    for item in regex:
+        for name in filenames:
+            #Only looking at first 75% of letters of regex
+            item_length = round(len(item)*0.75)
+            match = re.findall(item[0:item_length], name.upper())
+            #if the wellname regex is found, append the name of the sheet to the matches array
+            if match:
+                matches.append(name)
+        #if matches were found/appended, then we can break the regex search loop 
+        if len(matches)>0:
+            break
+    #checking to see if there were multiple matches, if 1 match, then get the only sheet
+    if len(matches) < 2:
+        wb = matches[0]
+    
+    #if there are more than 1 match, pull the well number using regex library and search the matches list for that number
+    elif len(matches)>=2:
+        for match in matches:
+            if re.findall('\d^[\W][a-zA-z]',well["Well Number"]):
+                pass
+#######^ trying to figure out logic to match wells with multiple matches in file list
+    
+    
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
 
 #special case to cleanup vieman gauge sheet names for data to be found correctly - removing second sheet in gaugesheet which is useless
 if well["RRC ID"] == 21610:
