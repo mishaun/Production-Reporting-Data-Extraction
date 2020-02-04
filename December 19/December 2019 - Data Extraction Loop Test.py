@@ -123,6 +123,7 @@ for i in range(0,len(map_filtered)):
 
     #slicing off 1 well and assigning values needed for determining which functions to call
     well = map_filtered.iloc[i]
+
     
     ######### Excel opening, retrieving, closing section
     
@@ -144,6 +145,7 @@ for i in range(0,len(map_filtered)):
         for word in regex:
             if len(word) > 3:
                 cleaned_regex.append(word)
+
         
         regex = cleaned_regex
 
@@ -179,6 +181,7 @@ for i in range(0,len(map_filtered)):
         
         else:
             print(well["Lease Name"] + " - File not found")
+
             gauge_sheet_filename = "File Not Found"
     
     #assiging value to see what file was actually pulled if searched
@@ -319,7 +322,9 @@ for i in range(0,len(map_filtered)):
 map_filtered = data_map[(data_map['Magnum Wolfpak #'].notnull()) & (data_map["Filename"] != 'Not Available')]
 map_filtered = map_filtered[:-1]
                           
+
 summary = map_filtered[["Lease Name","Well Number", "Gauge Sheet Prod Vol","Closing Oil Stock", "Filename", "Pulled File"]]
 failed = summary[summary["Closing Oil Stock"].isnull()]
+
 
 print("--- %s seconds ---" % (time.time() - t))
