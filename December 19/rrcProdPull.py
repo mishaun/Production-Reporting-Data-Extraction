@@ -16,14 +16,14 @@ opIDs = {
         }
 
 monthDict={'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
-
+filepath = os.path.dirname(__file__)
 
 def getPreviousMonthPR(operatorName, month, year):
     #driver will be used based on operating system - windows or mac
     try:
-        driver = webdriver.Chrome(os.path.dirname(__file__) + "/chromedriver.exe")
+        driver = webdriver.Chrome(filepath + "/chromedriver.exe")
     except:
-        driver = webdriver.Chrome(os.path.dirname(__file__) + "/chromedriver")
+        driver = webdriver.Chrome(filepath + "/chromedriver")
     
     driver.get("http://webapps.rrc.texas.gov/PR/initializePublicQueriesMenuAction.do")
     
@@ -47,9 +47,9 @@ def getPreviousMonthPR(operatorName, month, year):
         previousMonthVal = monthDict[month] - 1
         
         #The previous month value will be found in month dictionary and return its key to get previous month string name
-        for key,val in monthDict.items():
-            if val == previousMonthVal:
-                previousMonth = key
+        #converting result of filtered month dictionary to a list and grabbing the first element in the tuple - which contains the month
+        #evaluating the second element in tuple - which is why it is x[1]
+        previousMonth = list(filter(lambda x: x[1] == previousMonthVal, monthDict.items()))[0][0]
     
     #rrc website will then be inputed the previous month's name
     repSelect.send_keys(previousMonth)
