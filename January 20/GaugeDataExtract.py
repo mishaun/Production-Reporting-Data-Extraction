@@ -21,13 +21,20 @@ This Data Map spreadsheet is then stored as a Pandas DataFrame.
 Also, due to the company's lean and unorganized structure, the source data filenames
 may have to literally be passed.  However, the program will attempt to match and find the
 source file based on well name search within the source file directory. The program should 
-fully execute and not break upon not being able to find a well's gauge sheet (data source)
+fully execute and not break upon not being able to find a well's gauge sheet (data source).
+Potential bugs are pulling the wrong sheet when well names of similar or duplicate names are in the filename
 
 At the end, a dataframe will be created to view pulled values, file names pulled
 for data qualty assurance.
 These extracted values will then be pasted into the reporting spreadsheet, and 
 also verified for accuracy based on additional calculations and factors
 
+The reporting spreadsheet will flag mismatches of 20 bbls or more in yellow, which will allow 
+for an investigation on which numbers were off, and why
+
+Starting in 2020, the code was updated to account for wells with multiple months per workbook
+Since the report month is 2020, '20' would be a match for 2019, due to 2019 having '20'
+This bug was resolved by only evaluating the last 2 digits of the worksheet tab names after matching on the given month (jan, feb, etc)
 
 """
 
