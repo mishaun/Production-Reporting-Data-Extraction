@@ -244,6 +244,9 @@ for i in range(0,len(map_filtered)):
         #Checking condition if well does not have monthly tabs, then look for well name
         elif well["Monthly Tabs"] == "N":
             
+            #fixes bug where gauge sheets contained duplicate of well names with "ticket" sheet
+            sheetnames = list(filter(lambda x: "tickets" not in x.lower(), sheetnames))
+            
             if len(sheetnames) == 1:
                 getsheet = sheetnames[0]
             else:
@@ -302,7 +305,7 @@ for i in range(0,len(map_filtered)):
                 cellNumber = str(int(cellNumber) - (31-days))
                 
                 #extracting letter from oil stock cells to concat with shifted cell number
-                cellLetter = re.findall('[A-Z]',cell)[0]
+                cellLetter = re.findall('[A-Z]+',cell)[0]
                 
                 shiftedStockCells.append(cellLetter + cellNumber)
             
