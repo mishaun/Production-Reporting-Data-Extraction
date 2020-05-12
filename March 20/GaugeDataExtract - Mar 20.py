@@ -98,7 +98,7 @@ def special_remove(workbook, sheetindex):
     workbook.save(gauge_sheet_directory + '/' + gauge_sheet_filename)
     
 #Parameters for input based on report month
-reportMonth = "Feb"
+reportMonth = "Mar"
 reportYear = 2020
 monthDict={'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
 
@@ -113,14 +113,14 @@ import rrcProdPull as prpull
 #Path for gauge sheet folder
 #function will get directory of project folder where this file python file is located
 abspath = os.path.dirname(__file__)
-gauge_sheet_directory = abspath + '/Gauge Sheets - Feb 2020'
+gauge_sheet_directory = abspath + '/Gauge Sheets - Mar 2020'
 
 #Storing file names for gauge sheets in variable filenames
 filenames = os.listdir(gauge_sheet_directory)
 
 #importing data map dataframe - adding new blank column to keep track of what file was pulled for extraction
-data_map_path = 'Feb 2020 - MPLP - PR EDI.xlsm'
-data_map = pd.read_excel(data_map_path, header = 4, sheet_name = "Working Spreadsheet Feb 20", usecols = 'C:AQ')
+data_map_path = 'March 2020 - MPLP - PR EDI.xlsm'
+data_map = pd.read_excel(data_map_path, header = 4, sheet_name = "Working Spreadsheet Mar 20", usecols = 'C:AQ')
 data_map["Pulled File"] = ''
 
 #limiting data map to the wells that have inputted info based on oil production last month
