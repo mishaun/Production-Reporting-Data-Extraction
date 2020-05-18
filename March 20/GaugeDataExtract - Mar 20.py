@@ -236,6 +236,10 @@ for i in range(0,len(map_filtered)):
         #checking condition if well has gauge sheets by month
         elif well["Monthly Tabs"]=="Y" and well["Multiple Years"] == "N":
             
+            #fixes bug where gauge sheets contained duplicate of well names with "ticket" sheet
+            sheetnames = list(filter(lambda x: "tickets" not in x.lower(), sheetnames))
+            sheetnames = list(filter(lambda x: "sales" not in x.lower(), sheetnames))
+            
             for name in sheetnames:
                 if reportMonth.upper() in name.upper():
                     getsheet = name
@@ -246,6 +250,7 @@ for i in range(0,len(map_filtered)):
             
             #fixes bug where gauge sheets contained duplicate of well names with "ticket" sheet
             sheetnames = list(filter(lambda x: "tickets" not in x.lower(), sheetnames))
+            sheetnames = list(filter(lambda x: "sales" not in x.lower(), sheetnames))
             
             if len(sheetnames) == 1:
                 getsheet = sheetnames[0]
