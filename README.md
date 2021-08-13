@@ -35,11 +35,6 @@
 
 4. Final Pandas DataFrame Storing Extracted Data to be Reported Loaded Into EDI Sheet.
 
-
-
-
-
-
 # Additional & Full Length Overview
 
 This python program is designed to open non-standardized .xlsx 
