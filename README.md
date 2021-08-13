@@ -1,4 +1,46 @@
-# Python-Projects
+# Production Reporting RRC - Data Extraction & EDI Preparation
+
+# Brief Overview
+
+1. This project will expedite the process of reporting oil and gas volumes to the Texas oil and gas commission (RRC).
+
+2. Using Python, the project will loop through Excel files holding production data for each well in the company and extract the desired data for reporting.
+
+3.  The data will be loaded intoto an EDI Excel template accepted by the RRC for efficient, batch uploads to the commission
+
+# Technical Challenges of Project
+1.  Handle non-standardized file names by using partial matches
+2.  Create dictionary/map for pulling files & values due to non-standardized/varying formats of source data Excel sheets
+
+3.  Create program and processes to handle different formats of Excel workbooks
+
+
+# Images/Screenshots
+
+## Source Data, Excel EDI & Extracted Data
+
+1.  Data Map for Pulling Data by Well
+![Data Map Screenshot](Images/DataMap.png)
+
+2.  EDI for Submission
+![Final EDI for Submission](Images/FinalEDI.png)
+
+3.  Examples of Source Data Excel Sheets
+* Multiple Months
+![Multiple Month Gaugesheet](Images/GaugeSheetMultipleMonths.png)
+
+* Multiple Wells per Workbook
+![Multiple Wells Gaugesheet](Images/MultipleWellsGauge.png)
+
+
+4. Final Pandas DataFrame Storing Extracted Data to be Reported Loaded Into EDI Sheet.
+
+
+
+
+
+
+# Additional & Full Length Overview
 
 This python program is designed to open non-standardized .xlsx 
 files and pull data certain values for efficient Texas RRC Production Reporting.
